@@ -5,7 +5,9 @@ import com.quickbite.model.Order;
 import com.quickbite.model.User;
 import com.quickbite.request.AddCartItemRequest;
 import com.quickbite.request.OrderRequest;
+import com.quickbite.response.PaymentResponse;
 import com.quickbite.service.OrderService;
+import com.quickbite.service.PaymentService;
 import com.quickbite.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,14 +24,18 @@ public class OrderController {
     private OrderService orderService;
 
     @Autowired
+    private PaymentService paymentService;
+
+    @Autowired
     private UserService userService;
 
     @PostMapping("/order")
-    public ResponseEntity<Order> createOrder(@RequestBody OrderRequest req,
-                                                  @RequestHeader("Authorization") String jwt) throws Exception {
+    public ResponseEntity<PaymentResponse> createOrder(@RequestBody OrderRequest req,
+                                                       @RequestHeader("Authorization") String jwt) throws Exception {
         User user=userService.findUserByJwtToken(jwt);
         Order order =orderService.createOrder(req,user);
-        return new ResponseEntity<>(order, HttpStatus.CREATED);
+        PaymentResponse res=paymentService.createPaymentLink(order);
+        return new ResponseEntity<>(res, HttpStatus.CREATED);
     }
 
     @GetMapping("/order/user")
