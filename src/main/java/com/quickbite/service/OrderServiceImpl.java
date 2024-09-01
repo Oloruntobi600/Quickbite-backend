@@ -100,9 +100,16 @@ public class OrderServiceImpl implements OrderService{
 
     }
 
+//    @Override
+//    public List<Order> getUsersOrder(Long userId) throws Exception {
+//        return orderRepository.findByCustomerId(userId);
+//    }
+
     @Override
     public List<Order> getUsersOrder(Long userId) throws Exception {
-        return orderRepository.findByCustomerId(userId);
+        List<Order> orders = orderRepository.findByCustomerId(userId);
+        // Ensure an empty list is returned if no orders are found
+        return orders != null ? orders : new ArrayList<>();
     }
 
     @Override
@@ -113,7 +120,8 @@ public class OrderServiceImpl implements OrderService{
                     order.getOrderStatus().equals(orderStatus)).collect(Collectors.toList());
         }
 
-        return orders;
+//        return orders;
+        return orders != null ? orders : new ArrayList<>();
     }
 
     @Override

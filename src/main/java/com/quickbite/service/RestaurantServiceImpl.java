@@ -13,20 +13,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class RestaurantServiceImpl implements RestaurantService{
 
-    @Autowired
-    private RestaurantRepository restaurantRepository;
+    private final RestaurantRepository restaurantRepository;
+    private final AddressRepository addressRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    private AddressRepository addressRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    public RestaurantServiceImpl(RestaurantRepository restaurantRepository,
+                                 AddressRepository addressRepository,
+                                 UserRepository userRepository) {
+        this.restaurantRepository = restaurantRepository;
+        this.addressRepository = addressRepository;
+        this.userRepository = userRepository;
+    }
 
     @Override
     @Transactional
@@ -68,11 +71,10 @@ public class RestaurantServiceImpl implements RestaurantService{
     }
 
     @Override
+    @Transactional
     public void deleteRestaurant(Long restaurantId) throws Exception {
         Restaurant restaurant = findRestaurantById(restaurantId);
-
         restaurantRepository.delete(restaurant);
-
     }
 
     @Override
@@ -88,22 +90,29 @@ public class RestaurantServiceImpl implements RestaurantService{
 
     @Override
     public Restaurant findRestaurantById(Long id) throws Exception {
-        Optional<Restaurant> opt = restaurantRepository.findById(id);
-
-        if(opt.isEmpty()){
-            throw new Exception("restaurant not found id " +id);
-        }
-        return opt.get();
+        return restaurantRepository.findById(id)
+                .orElseThrow(() -> new Exception("Restaurant not found with id " + id));
     }
 
     @Override
     public Restaurant getRestaurantByUserId(Long userId) throws Exception {
-        Restaurant restaurant = restaurantRepository.findByOwnerId(userId);
-        if(restaurant==null){
-            throw new Exception("restaurant not found with owner id " +userId);
-        }
-        return restaurant ;
+        return null;
     }
+
+    //    @Override
+//    public Restaurant getRestaurantByUserId(Long userId) throws Exception {
+//        return Optional.ofNullable(restaurantRepository.findByOwnerId(userId))
+//                .orElseThrow(() -> new Exception("Restaurant not found with owner id " + userId));
+//    }
+@Override
+public List<Restaurant> getRestaurantsByUserId(Long userId) {
+    List<Restaurant> restaurants = restaurantRepository.findByOwnerId(userId);
+    if (restaurants.isEmpty()) {
+        throw new RuntimeException("No restaurants found for user ID: " + userId);
+    }
+    return restaurants;
+}
+
 
     @Override
     public RestaurantDto addToFavorites(Long restaurantId, User user) throws Exception {
@@ -116,20 +125,33 @@ public class RestaurantServiceImpl implements RestaurantService{
         dto.setTitle(restaurant.getName());
         dto.setId(restaurantId);
 
-        boolean isFavorited = false;
-        List<RestaurantDto> favorites = user.getFavorites();
-        for (RestaurantDto favorite : favorites)
-            if (favorite.getId().equals(restaurantId)){
-                isFavorited = true;
-                break;
-            }
+//        boolean isFavorited = false;
+//        List<RestaurantDto> favorites = user.getFavorites();
+//        for (RestaurantDto favorite : favorites)
+//            if (favorite.getId().equals(restaurantId)){
+//                isFavorited = true;
+//                break;
+//            }
+//
+//        if (isFavorited){
+//            favorites.removeIf(favorite -> favorite.getId().equals(restaurantId));
+//        }else {
+//            favorites.add(dto);
+//        }
+//
+//        userRepository.save(user);
+//        return dto;
+//    }
 
-        if (isFavorited){
-            favorites.removeIf(favorite -> favorite.getId().equals(restaurantId));
-        }else {
+        Set<RestaurantDto> favorites = new HashSet<>(user.getFavorites());
+
+        if (favorites.contains(dto)) {
+            favorites.remove(dto);
+        } else {
             favorites.add(dto);
         }
 
+        user.setFavorites(new ArrayList<>(favorites));
         userRepository.save(user);
         return dto;
     }

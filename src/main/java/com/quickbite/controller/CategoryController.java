@@ -2,6 +2,7 @@ package com.quickbite.controller;
 
 import com.quickbite.model.Category;
 import com.quickbite.model.User;
+import com.quickbite.request.IngredientCategoryRequest;
 import com.quickbite.service.CategoryService;
 import com.quickbite.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +23,12 @@ public class CategoryController {
     private UserService userService;
 
     @PostMapping("/admin/category")
-    public ResponseEntity<Category> createCategory(@RequestBody Category category,
+    public ResponseEntity<Category> createCategory(@RequestBody IngredientCategoryRequest request,
                                                    @RequestHeader("Authorization") String jwt) throws Exception {
         System.out.println("Received JWT Token: " + jwt);
       User user = userService.findUserByJwtToken(jwt);
 
-      Category createCategory=categoryService.createCategory(category.getName(), user.getId());
+      Category createCategory=categoryService.createCategory(request.getName(), user.getId(), request.getRestaurantId());
 
       return new ResponseEntity<>(createCategory, HttpStatus.CREATED);
     }

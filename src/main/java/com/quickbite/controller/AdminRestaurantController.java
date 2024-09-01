@@ -22,15 +22,22 @@ public class AdminRestaurantController {
     private UserService userService;
 
     @PostMapping()
-    public ResponseEntity<Restaurant> createRestaurant(
+    public ResponseEntity<?> createRestaurant(
             @RequestBody CreateRestaurantRequest req,
             @RequestHeader("Authorization") String jwt
-            ) throws Exception {
-        User user = userService.findUserByJwtToken(jwt);
-
-        Restaurant restaurant = restaurantService.createRestaurant(req,user);
-        return new ResponseEntity<>(restaurant, HttpStatus.CREATED);
+    ) {
+        try {
+            User user = userService.findUserByJwtToken(jwt); // Assuming this method exists and works correctly
+            Restaurant restaurant = restaurantService.createRestaurant(req, user); // Ensure this method signature matches
+            return new ResponseEntity<>(restaurant, HttpStatus.CREATED);
+        } catch (Exception e) {
+            // Log the exception (optional)
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Error creating restaurant: " + e.getMessage()));
+        }
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Restaurant> updateRestaurant(
@@ -44,20 +51,35 @@ public class AdminRestaurantController {
         return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<MessageResponse> deleteRestaurant(
-
-            @RequestHeader("Authorization") String jwt,
-            @PathVariable Long id
-    ) throws Exception {
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<MessageResponse> deleteRestaurant(
+//
+//            @RequestHeader("Authorization") String jwt,
+//            @PathVariable Long id
+//    ) throws Exception {
+//        User user = userService.findUserByJwtToken(jwt);
+//
+//        restaurantService.deleteRestaurant(id);
+//
+//        MessageResponse res = new MessageResponse();
+//        res.setMessage("restaurant deleted successfully");
+//        return new ResponseEntity<>(res, HttpStatus.OK);
+//    }
+@DeleteMapping("/{id}")
+public ResponseEntity<MessageResponse> deleteRestaurant(
+        @RequestHeader("Authorization") String jwt,
+        @PathVariable Long id
+) {
+    try {
         User user = userService.findUserByJwtToken(jwt);
-
         restaurantService.deleteRestaurant(id);
-
-        MessageResponse res = new MessageResponse();
-        res.setMessage("restaurant deleted successfully");
-        return new ResponseEntity<>(res, HttpStatus.OK);
+        return ResponseEntity.ok(new MessageResponse("Restaurant deleted successfully"));
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new MessageResponse("Error deleting restaurant: " + e.getMessage()));
     }
+}
 
     @PutMapping("/{id}/status")
     public ResponseEntity<Restaurant> updateRestaurantStatus(

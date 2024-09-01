@@ -9,13 +9,14 @@ import java.util.List;
 
 public interface RestaurantService {
 
-    public Restaurant createRestaurant(CreateRestaurantRequest req, User user);
+    public Restaurant createRestaurant(CreateRestaurantRequest req, User user) throws Exception;
 
     public Restaurant updateRestaurant(Long restaurantId, CreateRestaurantRequest updatedRestaurant) throws Exception;
 
     public void deleteRestaurant(Long restaurantId) throws Exception;
 
     public List<Restaurant> getAllRestaurant();
+    List<Restaurant> getRestaurantsByUserId(Long userId) throws Exception;
 
     public List<Restaurant> searchRestaurant(String keyword);
 

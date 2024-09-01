@@ -44,6 +44,21 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Restaurant>> getRestaurantsByUserId(
+            @RequestHeader("Authorization") String jwt,
+            @PathVariable Long userId
+    ) throws Exception {
+        User user = userService.findUserByJwtToken(jwt);
+
+        // Verify the user ID matches the authenticated user (if applicable)
+        if (!user.getId().equals(userId)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        List<Restaurant> restaurants = (List<Restaurant>) restaurantService.getRestaurantByUserId(userId);
+        return new ResponseEntity<>(restaurants, HttpStatus.OK);
+    }
     @GetMapping("/{id}")
     public ResponseEntity< Restaurant> findRestaurantById(
             @RequestHeader("Authorization") String jwt,
