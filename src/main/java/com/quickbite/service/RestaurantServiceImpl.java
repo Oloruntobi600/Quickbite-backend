@@ -52,30 +52,62 @@ public class RestaurantServiceImpl implements RestaurantService{
         return restaurantRepository.save(restaurant);
     }
 
+//    @Override
+//    public Restaurant updateRestaurant(Long restaurantId, CreateRestaurantRequest updatedRestaurant) throws Exception {
+//
+//        Restaurant restaurant = findRestaurantById(restaurantId);
+//
+//        if(restaurant.getCuisineType()!=null){
+//            restaurant.setCuisineType(updatedRestaurant.getCuisineType());
+//        }
+//        if(restaurant.getDescription()!=null){
+//            restaurant.setDescription(updatedRestaurant.getDescription());
+//        }
+//        if(restaurant.getName()!=null){
+//            restaurant.setName(updatedRestaurant.getName());
+//        }
+//
+//        return restaurantRepository.save(restaurant);
+//    }
+
     @Override
     public Restaurant updateRestaurant(Long restaurantId, CreateRestaurantRequest updatedRestaurant) throws Exception {
-
+        if (restaurantId == null) {
+            throw new IllegalArgumentException("Restaurant ID must not be null");
+        }
         Restaurant restaurant = findRestaurantById(restaurantId);
 
-        if(restaurant.getCuisineType()!=null){
+        if (updatedRestaurant.getCuisineType() != null) {
             restaurant.setCuisineType(updatedRestaurant.getCuisineType());
         }
-        if(restaurant.getDescription()!=null){
+        if (updatedRestaurant.getDescription() != null) {
             restaurant.setDescription(updatedRestaurant.getDescription());
         }
-        if(restaurant.getName()!=null){
+        if (updatedRestaurant.getName() != null) {
             restaurant.setName(updatedRestaurant.getName());
         }
 
         return restaurantRepository.save(restaurant);
     }
 
+
+//    @Override
+//    @Transactional
+//    public void deleteRestaurant(Long restaurantId) throws Exception {
+//        Restaurant restaurant = findRestaurantById(restaurantId);
+//        restaurantRepository.delete(restaurant);
+//    }
+
     @Override
     @Transactional
     public void deleteRestaurant(Long restaurantId) throws Exception {
+        if (restaurantId == null) {
+            throw new IllegalArgumentException("Restaurant ID must not be null");
+        }
         Restaurant restaurant = findRestaurantById(restaurantId);
         restaurantRepository.delete(restaurant);
     }
+
 
     @Override
     public List<Restaurant> getAllRestaurant() {
@@ -88,11 +120,21 @@ public class RestaurantServiceImpl implements RestaurantService{
         return restaurantRepository.findBySearchQuery(keyword);
     }
 
+//    @Override
+//    public Restaurant findRestaurantById(Long id) throws Exception {
+//        return restaurantRepository.findById(id)
+//                .orElseThrow(() -> new Exception("Restaurant not found with id " + id));
+//    }
+
     @Override
     public Restaurant findRestaurantById(Long id) throws Exception {
+        if (id == null) {
+            throw new IllegalArgumentException("The given id must not be null");
+        }
         return restaurantRepository.findById(id)
                 .orElseThrow(() -> new Exception("Restaurant not found with id " + id));
     }
+
 
     @Override
     public Restaurant getRestaurantByUserId(Long userId) throws Exception {

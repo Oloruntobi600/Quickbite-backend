@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/admin/restaurants")
 public class AdminRestaurantController {
@@ -65,11 +67,31 @@ public class AdminRestaurantController {
 //        res.setMessage("restaurant deleted successfully");
 //        return new ResponseEntity<>(res, HttpStatus.OK);
 //    }
+//@DeleteMapping("/{id}")
+//public ResponseEntity<MessageResponse> deleteRestaurant(
+//        @RequestHeader("Authorization") String jwt,
+//        @PathVariable Long id
+//) {
+//    try {
+//        User user = userService.findUserByJwtToken(jwt);
+//        restaurantService.deleteRestaurant(id);
+//        return ResponseEntity.ok(new MessageResponse("Restaurant deleted successfully"));
+//    } catch (Exception e) {
+//        e.printStackTrace();
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                .body(new MessageResponse("Error deleting restaurant: " + e.getMessage()));
+//    }
+//}
 @DeleteMapping("/{id}")
 public ResponseEntity<MessageResponse> deleteRestaurant(
         @RequestHeader("Authorization") String jwt,
         @PathVariable Long id
 ) {
+    if (id == null) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new MessageResponse("Restaurant ID is required"));
+    }
+
     try {
         User user = userService.findUserByJwtToken(jwt);
         restaurantService.deleteRestaurant(id);
@@ -80,6 +102,7 @@ public ResponseEntity<MessageResponse> deleteRestaurant(
                 .body(new MessageResponse("Error deleting restaurant: " + e.getMessage()));
     }
 }
+
 
     @PutMapping("/{id}/status")
     public ResponseEntity<Restaurant> updateRestaurantStatus(
@@ -95,15 +118,18 @@ public ResponseEntity<MessageResponse> deleteRestaurant(
     }
 
     @GetMapping("/user")
-    public ResponseEntity<Restaurant> findRestaurantByUserId(
+    public ResponseEntity<List<Restaurant>> findRestaurantByUserId(
 
             @RequestHeader("Authorization") String jwt
 
     ) throws Exception {
         User user = userService.findUserByJwtToken(jwt);
 
-        Restaurant restaurant= restaurantService.getRestaurantByUserId(user.getId());
-
-        return new ResponseEntity<>(restaurant, HttpStatus.OK);
+//        Restaurant restaurant= restaurantService.getRestaurantByUserId(user.getId());
+//
+//        return new ResponseEntity<>(restaurant, HttpStatus.OK);
+//    }
+        List<Restaurant> restaurants = restaurantService.getRestaurantsByUserId(user.getId());
+        return new ResponseEntity<>(restaurants, HttpStatus.OK);
     }
 }

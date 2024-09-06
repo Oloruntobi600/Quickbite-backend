@@ -46,4 +46,27 @@ public class OrderController {
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
+    @PutMapping("/admin/orders/{orderId}/{orderStatus}")
+    public ResponseEntity<Order> updateOrderStatus(
+            @PathVariable Long orderId,
+            @PathVariable String orderStatus,
+            @RequestHeader("Authorization") String jwt) throws Exception {
+        // Validate and handle the orderStatus
+        if (!orderStatus.equals("OUT_FOR_DELIVERY") && !orderStatus.equals("DELIVERED") &&
+                !orderStatus.equals("COMPLETED") && !orderStatus.equals("PENDING")) {
+            throw new Exception("Invalid order status");
+        }
+        Order updatedOrder = orderService.updateOrder(orderId, orderStatus);
+        return new ResponseEntity<>(updatedOrder, HttpStatus.OK);
+    }
+
+    @GetMapping("/admin/order/restaurant/{restaurantId}")
+    public ResponseEntity<List<Order>> getRestaurantsOrder(
+            @PathVariable Long restaurantId,
+            @RequestParam(value = "order_status", required = false) String orderStatus,
+            @RequestHeader("Authorization") String jwt) throws Exception {
+        List<Order> orders = orderService.getRestaurantsOrder(restaurantId, orderStatus);
+        return new ResponseEntity<>(orders, HttpStatus.OK);
+    }
+
 }
