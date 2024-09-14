@@ -15,11 +15,11 @@ services:
   app:
     build: .
     ports:
-      - "5050:5050"
+      - "8080:8080"
     depends_on:
       - postgres
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/Quickbite-projects  # Use the internal port 5432 and the service name `postgres`
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5433/Quickbite-projects  # Use the internal port 5432 and the service name `postgres`
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: Olawumi  # Ensure this matches the password set for the postgres service
     networks:
