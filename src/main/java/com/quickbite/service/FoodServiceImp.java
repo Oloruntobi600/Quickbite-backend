@@ -3,7 +3,9 @@ package com.quickbite.service;
 import com.quickbite.model.Category;
 import com.quickbite.model.Food;
 import com.quickbite.model.Restaurant;
+import com.quickbite.repository.CartItemRepository;
 import com.quickbite.repository.FoodRepository;
+import com.quickbite.repository.OrderItemRepository;
 import com.quickbite.request.CreateFoodRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,12 @@ public class FoodServiceImp implements FoodService{
 
     @Autowired
     private FoodRepository foodRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private CartItemRepository cartItemRepository;
     @Override
     public Food createFood(CreateFoodRequest req, Category category, Restaurant restaurant) {
         Food food = new Food();
@@ -42,9 +50,24 @@ public class FoodServiceImp implements FoodService{
     @Override
     public void deleteFood(Long foodId) throws Exception {
 
-        Food food=findFoodById(foodId);
-        food.setRestaurant(null);
-        foodRepository.save(food);
+//        Food food=findFoodById(foodId);
+//        food.setRestaurant(null);
+//        foodRepository.save(food);
+
+        if (foodId == null) {
+            throw new IllegalArgumentException("Food ID must not be null");
+        }
+
+        // Find the food item
+        Food food = foodRepository.findById(foodId)
+                .orElseThrow(() -> new Exception("Food not found with id " + foodId));
+
+        // Remove associated order items
+        orderItemRepository.deleteByFoodId(foodId);
+
+        // Delete the food item
+        foodRepository.delete(food);
+        cartItemRepository.deleteByFoodId(foodId);
     }
 
     @Override

@@ -4,9 +4,7 @@ import com.quickbite.dto.RestaurantDto;
 import com.quickbite.model.Address;
 import com.quickbite.model.Restaurant;
 import com.quickbite.model.User;
-import com.quickbite.repository.AddressRepository;
-import com.quickbite.repository.RestaurantRepository;
-import com.quickbite.repository.UserRepository;
+import com.quickbite.repository.*;
 import com.quickbite.request.CreateRestaurantRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +19,12 @@ public class RestaurantServiceImpl implements RestaurantService{
     private final RestaurantRepository restaurantRepository;
     private final AddressRepository addressRepository;
     private final UserRepository userRepository;
+
+    @Autowired
+    private CartItemRepository cartItemRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Autowired
     public RestaurantServiceImpl(RestaurantRepository restaurantRepository,
@@ -52,23 +56,6 @@ public class RestaurantServiceImpl implements RestaurantService{
         return restaurantRepository.save(restaurant);
     }
 
-//    @Override
-//    public Restaurant updateRestaurant(Long restaurantId, CreateRestaurantRequest updatedRestaurant) throws Exception {
-//
-//        Restaurant restaurant = findRestaurantById(restaurantId);
-//
-//        if(restaurant.getCuisineType()!=null){
-//            restaurant.setCuisineType(updatedRestaurant.getCuisineType());
-//        }
-//        if(restaurant.getDescription()!=null){
-//            restaurant.setDescription(updatedRestaurant.getDescription());
-//        }
-//        if(restaurant.getName()!=null){
-//            restaurant.setName(updatedRestaurant.getName());
-//        }
-//
-//        return restaurantRepository.save(restaurant);
-//    }
 
     @Override
     public Restaurant updateRestaurant(Long restaurantId, CreateRestaurantRequest updatedRestaurant) throws Exception {
@@ -91,12 +78,6 @@ public class RestaurantServiceImpl implements RestaurantService{
     }
 
 
-//    @Override
-//    @Transactional
-//    public void deleteRestaurant(Long restaurantId) throws Exception {
-//        Restaurant restaurant = findRestaurantById(restaurantId);
-//        restaurantRepository.delete(restaurant);
-//    }
 
     @Override
     @Transactional
@@ -104,7 +85,15 @@ public class RestaurantServiceImpl implements RestaurantService{
         if (restaurantId == null) {
             throw new IllegalArgumentException("Restaurant ID must not be null");
         }
-        Restaurant restaurant = findRestaurantById(restaurantId);
+        // Find the restaurant
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new Exception("Restaurant not found with id " + restaurantId));
+
+        // Optionally: Delete related cart items
+        cartItemRepository.deleteByFoodId(restaurantId);
+        categoryRepository.deleteByRestaurantId(restaurantId);
+
+        // Delete the restaurant
         restaurantRepository.delete(restaurant);
     }
 
@@ -120,11 +109,6 @@ public class RestaurantServiceImpl implements RestaurantService{
         return restaurantRepository.findBySearchQuery(keyword);
     }
 
-//    @Override
-//    public Restaurant findRestaurantById(Long id) throws Exception {
-//        return restaurantRepository.findById(id)
-//                .orElseThrow(() -> new Exception("Restaurant not found with id " + id));
-//    }
 
     @Override
     public Restaurant findRestaurantById(Long id) throws Exception {
@@ -141,11 +125,7 @@ public class RestaurantServiceImpl implements RestaurantService{
         return null;
     }
 
-    //    @Override
-//    public Restaurant getRestaurantByUserId(Long userId) throws Exception {
-//        return Optional.ofNullable(restaurantRepository.findByOwnerId(userId))
-//                .orElseThrow(() -> new Exception("Restaurant not found with owner id " + userId));
-//    }
+
 @Override
 public List<Restaurant> getRestaurantsByUserId(Long userId) {
     List<Restaurant> restaurants = restaurantRepository.findByOwnerId(userId);
@@ -167,23 +147,7 @@ public List<Restaurant> getRestaurantsByUserId(Long userId) {
         dto.setTitle(restaurant.getName());
         dto.setId(restaurantId);
 
-//        boolean isFavorited = false;
-//        List<RestaurantDto> favorites = user.getFavorites();
-//        for (RestaurantDto favorite : favorites)
-//            if (favorite.getId().equals(restaurantId)){
-//                isFavorited = true;
-//                break;
-//            }
-//
-//        if (isFavorited){
-//            favorites.removeIf(favorite -> favorite.getId().equals(restaurantId));
-//        }else {
-//            favorites.add(dto);
-//        }
-//
-//        userRepository.save(user);
-//        return dto;
-//    }
+
 
         Set<RestaurantDto> favorites = new HashSet<>(user.getFavorites());
 

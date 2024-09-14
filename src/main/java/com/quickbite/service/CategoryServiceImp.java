@@ -3,8 +3,10 @@ package com.quickbite.service;
 import com.quickbite.model.Category;
 import com.quickbite.model.Restaurant;
 import com.quickbite.repository.CategoryRepository;
+import com.quickbite.repository.FoodRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +21,9 @@ public class CategoryServiceImp implements CategoryService{
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private FoodRepository foodRepository;
 
 //    @Override
 //    public Category createCategory(String name, Long userId) throws Exception {
@@ -52,26 +57,54 @@ public class CategoryServiceImp implements CategoryService{
 //    }
 //}
 
+//    @Override
+//    public Category createCategory(String name, Long userId, Long restaurantId) throws Exception {
+//        // Find the restaurant by ID and ensure it belongs to the user
+//        Restaurant restaurant = restaurantService.findRestaurantById(restaurantId);
+//
+//        if (!restaurant.getOwner().getId().equals(userId)) {
+//            throw new Exception("User is not the owner of the specified restaurant.");
+//        }
+//
+//        // Check if the category already exists for this restaurant
+//        List<Category> existingCategories = categoryRepository.findByNameAndRestaurantId(name, restaurant.getId());
+//        if (!existingCategories.isEmpty()) {
+//            return existingCategories.get(0); // Return the first existing category
+//        }
+//        Category category = new Category();
+//        category.setName(name);
+//        category.setRestaurant(restaurant);
+//
+//        return categoryRepository.save(category);
+//    }
+
     @Override
     public Category createCategory(String name, Long userId, Long restaurantId) throws Exception {
-        // Find the restaurant by ID and ensure it belongs to the user
+        if (restaurantId == null) {
+            throw new IllegalArgumentException("Restaurant ID must not be null");
+        }
         Restaurant restaurant = restaurantService.findRestaurantById(restaurantId);
+
+        if (restaurant == null) {
+            throw new Exception("Restaurant not found with id " + restaurantId);
+        }
 
         if (!restaurant.getOwner().getId().equals(userId)) {
             throw new Exception("User is not the owner of the specified restaurant.");
         }
 
-        // Check if the category already exists for this restaurant
         List<Category> existingCategories = categoryRepository.findByNameAndRestaurantId(name, restaurant.getId());
         if (!existingCategories.isEmpty()) {
             return existingCategories.get(0); // Return the first existing category
         }
+
         Category category = new Category();
         category.setName(name);
         category.setRestaurant(restaurant);
 
         return categoryRepository.save(category);
     }
+
 
     private Restaurant selectRestaurantForCategory(List<Restaurant> restaurants) {
         // Implement logic to select one restaurant from the list
@@ -106,5 +139,23 @@ public class CategoryServiceImp implements CategoryService{
             throw new Exception("category not found");
         }
         return optionalCategory.get();
+    }
+
+    @Transactional
+    @Override
+    public void deleteCategory(Long categoryId) throws Exception {
+        if (categoryId == null) {
+            throw new IllegalArgumentException("Category ID must not be null");
+        }
+
+        // Find the category
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new Exception("Category not found with id " + categoryId));
+
+        // Remove associated foods
+        foodRepository.deleteByCategoryId(categoryId);
+
+        // Delete the category
+        categoryRepository.delete(category);
     }
 }

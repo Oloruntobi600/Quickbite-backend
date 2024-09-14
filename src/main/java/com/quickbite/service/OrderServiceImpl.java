@@ -71,6 +71,7 @@ public class OrderServiceImpl implements OrderService{
 
         createdOrder.setItems(orderItems);
         createdOrder.setTotalPrice(totalPrice);
+        createdOrder.setTotalAmount(totalPrice);
 
         Order savedOrder=orderRepository.save(createdOrder);
         restaurant.getOrders().add(savedOrder);

@@ -51,20 +51,36 @@ public class IngredientServiceImp implements IngredientsService{
         return ingredientCategoryRepository.findByRestaurantId(id);
     }
 
+//    @Override
+//    public IngredientsItem createIngredientItem(Long restaurantId, String ingredientName, Long categoryId) throws Exception {
+//        Restaurant restaurant=restaurantService.findRestaurantById(restaurantId);
+//        IngredientCategory category= findIngredientCategoryById(categoryId);
+//
+//        IngredientsItem item= new IngredientsItem();
+//        item.setName(ingredientName);
+//        item.setRestaurant(restaurant);
+//        item.setCategory(category);
+//
+//        IngredientsItem ingredients= ingredientItemRepository.save(item);
+//        category.getIngredients().add(ingredients);
+//
+//        return ingredients;
+//    }
+
     @Override
     public IngredientsItem createIngredientItem(Long restaurantId, String ingredientName, Long categoryId) throws Exception {
-        Restaurant restaurant=restaurantService.findRestaurantById(restaurantId);
-        IngredientCategory category= findIngredientCategoryById(categoryId);
+        if (restaurantId == null || categoryId == null || ingredientName == null || ingredientName.trim().isEmpty()) {
+            throw new IllegalArgumentException("The given id or name must not be null");
+        }
+        Restaurant restaurant = restaurantService.findRestaurantById(restaurantId);
+        IngredientCategory category = findIngredientCategoryById(categoryId);
 
-        IngredientsItem item= new IngredientsItem();
+        IngredientsItem item = new IngredientsItem();
         item.setName(ingredientName);
         item.setRestaurant(restaurant);
         item.setCategory(category);
 
-        IngredientsItem ingredients= ingredientItemRepository.save(item);
-        category.getIngredients().add(ingredients);
-
-        return ingredients;
+        return ingredientItemRepository.save(item);
     }
 
     @Override

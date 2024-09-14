@@ -21,7 +21,7 @@ public class AdminOrderController {
     private UserService userService;
 
 
-    @GetMapping("/order/restaurant/{id}")
+    @GetMapping("/orders/restaurant/{id}")
     public ResponseEntity<List<Order>> getOrderHistory(
             @PathVariable Long id,
             @RequestParam(required = false) String order_status,
@@ -31,13 +31,13 @@ public class AdminOrderController {
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
-    @PutMapping("/order/{id}/{orderStatus}")
-    public ResponseEntity<Order> updateOrderStatus(
-            @PathVariable Long id,
-            @PathVariable String orderStatus,
-            @RequestHeader("Authorization") String jwt) throws Exception {
-        User user=userService.findUserByJwtToken(jwt);
-        Order orders =orderService.updateOrder(id, orderStatus);
-        return new ResponseEntity<>(orders, HttpStatus.OK);
-    }
+//    @PutMapping("/orders/{id}/{orderStatus}")
+//    public ResponseEntity<Order> updateOrderStatus(
+//            @PathVariable Long id,
+//            @PathVariable String orderStatus,
+//            @RequestHeader("Authorization") String jwt) throws Exception {
+//        User user=userService.findUserByJwtToken(jwt);
+//        Order orders =orderService.updateOrder(id, orderStatus);
+//        return new ResponseEntity<>(orders, HttpStatus.OK);
+//    }
 }

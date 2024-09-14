@@ -8,4 +8,6 @@ public class IngredientCategoryRequest {
     private String name;
 
     private Long restaurantId;
+
+
 }

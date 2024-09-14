@@ -1,5 +1,7 @@
 package com.quickbite.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,6 +26,19 @@ public class Food {
     private String description;
 
     private Long price;
+
+    @OneToMany(mappedBy = "food", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<OrderItem> orderItems = new ArrayList<>();
+
+    @OneToMany(mappedBy = "food", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<CartItem> cartItems = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    @JsonIgnore // Manage the serialization of this reference
+    private Category category;
 
     @ManyToOne
     private Category foodCategory;

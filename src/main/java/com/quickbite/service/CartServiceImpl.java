@@ -80,6 +80,10 @@ public class CartServiceImpl implements CartService{
     public Cart removeItemFromCart(Long cartItemId, String jwt) throws Exception {
         User user=userService.findUserByJwtToken(jwt);
 
+        if (cartItemId == null) {
+            throw new Exception("Cart item ID cannot be null");
+        }
+
         Cart cart=cartRepository.findByCustomerId(user.getId());
 
         Optional<CartItem> cartItemOptional=cartItemRepository.findById(cartItemId);

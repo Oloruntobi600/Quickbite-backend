@@ -23,6 +23,7 @@ public class CartItem {
     private Cart cart;
 
     @ManyToOne
+    @JoinColumn(name = "food_id", nullable = false)
     private Food food;
 
     private int quantity;

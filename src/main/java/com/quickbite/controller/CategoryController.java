@@ -26,6 +26,10 @@ public class CategoryController {
     public ResponseEntity<Category> createCategory(@RequestBody IngredientCategoryRequest request,
                                                    @RequestHeader("Authorization") String jwt) throws Exception {
         System.out.println("Received JWT Token: " + jwt);
+        System.out.println("Received request: " + request);
+        if (request.getRestaurantId() == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
       User user = userService.findUserByJwtToken(jwt);
 
       Category createCategory=categoryService.createCategory(request.getName(), user.getId(), request.getRestaurantId());

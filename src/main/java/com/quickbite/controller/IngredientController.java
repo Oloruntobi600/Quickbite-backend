@@ -19,43 +19,111 @@ public class IngredientController {
     @Autowired
     private IngredientsService ingredientsService;
 
-    @PostMapping("/category")
-    public ResponseEntity<IngredientCategory> createIngredientCategory(
-            @RequestBody IngredientCategoryRequest req
-            ) throws Exception {
-        IngredientCategory item=ingredientsService.createIngredientCategory(req.getName(), req.getRestaurantId());
-        return new ResponseEntity<>(item, HttpStatus.CREATED);
+//    @PostMapping("/category")
+//    public ResponseEntity<IngredientCategory> createIngredientCategory(
+//            @RequestBody IngredientCategoryRequest req
+//            ) throws Exception {
+//        IngredientCategory item=ingredientsService.createIngredientCategory(req.getName(), req.getRestaurantId());
+//        return new ResponseEntity<>(item, HttpStatus.CREATED);
+//    }
+@PostMapping("/category")
+public ResponseEntity<?> createIngredientCategory(
+        @RequestBody IngredientCategoryRequest req
+) {
+    if (req.getRestaurantId() == null) {
+        return ResponseEntity.badRequest().body("The given id must not be null");
     }
+    try {
+        IngredientCategory item = ingredientsService.createIngredientCategory(req.getName(), req.getRestaurantId());
+        return new ResponseEntity<>(item, HttpStatus.CREATED);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating ingredient category");
+    }
+}
+
+
+//    @PostMapping()
+//    public ResponseEntity<IngredientsItem> createIngredientItem(
+//            @RequestBody IngredientRequest req
+//    ) throws Exception {
+//        IngredientsItem item=ingredientsService.createIngredientItem(req.getRestaurantId(), req.getName(), req.getCategoryId());
+//        return new ResponseEntity<>(item, HttpStatus.CREATED);
+//    }
 
     @PostMapping()
-    public ResponseEntity<IngredientsItem> createIngredientItem(
+    public ResponseEntity<?> createIngredientItem(
             @RequestBody IngredientRequest req
-    ) throws Exception {
-        IngredientsItem item=ingredientsService.createIngredientItem(req.getRestaurantId(), req.getName(), req.getCategoryId());
-        return new ResponseEntity<>(item, HttpStatus.CREATED);
+    ) {
+        if (req.getRestaurantId() == null || req.getCategoryId() == null || req.getName() == null || req.getName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("The given id or name must not be null");
+        }
+        try {
+            IngredientsItem item = ingredientsService.createIngredientItem(req.getRestaurantId(), req.getName(), req.getCategoryId());
+            return new ResponseEntity<>(item, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating ingredient item: " + e.getMessage());
+        }
     }
+
+//    @PutMapping("/{id}/stock")
+//    public ResponseEntity<IngredientsItem> updateIngredientStock(
+//            @PathVariable Long id
+//    ) throws Exception {
+//        IngredientsItem item=ingredientsService.updateStock(id);
+//        return new ResponseEntity<>(item, HttpStatus.OK);
+//    }
 
     @PutMapping("/{id}/stock")
-    public ResponseEntity<IngredientsItem> updateIngredientStock(
+    public ResponseEntity<?> updateIngredientStock(
             @PathVariable Long id
-    ) throws Exception {
-        IngredientsItem item=ingredientsService.updateStock(id);
-        return new ResponseEntity<>(item, HttpStatus.OK);
+    ) {
+        try {
+            IngredientsItem item = ingredientsService.updateStock(id);
+            return new ResponseEntity<>(item, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating ingredient stock: " + e.getMessage());
+        }
     }
+
+
+//    @GetMapping("/restaurant/{id}")
+//    public ResponseEntity<List<IngredientsItem>> getRestaurantIngredient(
+//            @PathVariable Long id
+//    ) throws Exception {
+//      List<IngredientsItem> items=ingredientsService.findRestaurantsIngredients(id);
+//        return new ResponseEntity<>(items, HttpStatus.OK);
+//    }
 
     @GetMapping("/restaurant/{id}")
-    public ResponseEntity<List<IngredientsItem>> getRestaurantIngredient(
+    public ResponseEntity<?> getRestaurantIngredient(
             @PathVariable Long id
-    ) throws Exception {
-      List<IngredientsItem> items=ingredientsService.findRestaurantsIngredients(id);
-        return new ResponseEntity<>(items, HttpStatus.OK);
+    ) {
+        try {
+            List<IngredientsItem> items = ingredientsService.findRestaurantsIngredients(id);
+            return new ResponseEntity<>(items, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving ingredients: " + e.getMessage());
+        }
     }
 
+//    @GetMapping("/restaurant/{id}/category")
+//    public ResponseEntity<List<IngredientCategory>> getRestaurantIngredientCategory(
+//            @PathVariable Long id
+//    ) throws Exception {
+//        List<IngredientCategory> items=ingredientsService.findIngredientCategoryByRestaurantId(id);
+//        return new ResponseEntity<>(items, HttpStatus.OK);
+//    }
+//}
+
     @GetMapping("/restaurant/{id}/category")
-    public ResponseEntity<List<IngredientCategory>> getRestaurantIngredientCategory(
+    public ResponseEntity<?> getRestaurantIngredientCategory(
             @PathVariable Long id
-    ) throws Exception {
-        List<IngredientCategory> items=ingredientsService.findIngredientCategoryByRestaurantId(id);
-        return new ResponseEntity<>(items, HttpStatus.OK);
+    ) {
+        try {
+            List<IngredientCategory> items = ingredientsService.findIngredientCategoryByRestaurantId(id);
+            return new ResponseEntity<>(items, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving ingredient categories: " + e.getMessage());
+        }
     }
 }
