@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Olawumi  # Set a non-empty password here
+      POSTGRES_DB: Quickbite-projects
+    ports:
+      - "5433:5432"  # Map external port 5434 to internal port 5432
+    networks:
+      - Quickbite-network
+
+  app:
+    build: .
+    ports:
+      - "5050:5050"
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/Quickbite-projects  # Use the internal port 5432 and the service name `postgres`
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Olawumi  # Ensure this matches the password set for the postgres service
+    networks:
+      - Quickbite-network
+
+networks:
+  monetamedia-network:
+    driver: bridge
+
