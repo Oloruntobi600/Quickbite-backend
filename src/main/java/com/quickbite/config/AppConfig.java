@@ -47,11 +47,13 @@ public class AppConfig {
                         "http://localhost:3000/",
                        "https://quickbite-frontend.vercel.app/"
                ));
-               cfg.setAllowedMethods(Collections.singletonList("*"));
+//               cfg.setAllowedMethods(Collections.singletonList("*"));
+               cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                cfg.setAllowCredentials(true);
-               cfg.setAllowedHeaders(Collections.singletonList("*"));
-//               cfg.setExposedHeaders(Arrays.asList("Authorization"));
-                cfg.setExposedHeaders(Collections.singletonList("Authorization"));
+//               cfg.setAllowedHeaders(Collections.singletonList("*"));
+               cfg.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
+               cfg.setExposedHeaders(Arrays.asList("Authorization"));
+//                cfg.setExposedHeaders(Collections.singletonList("Authorization"));
                cfg.setMaxAge(3600L);
              return cfg;
             }
