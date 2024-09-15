@@ -81,6 +81,7 @@ public class AuthController {
         String username = req.getEmail();
         String password = req.getPassword();
 
+        try {
 
         Authentication authentication = authenticate(username, password);
 
@@ -95,6 +96,19 @@ public class AuthController {
         authResponse.setRole(USER_ROLE.valueOf(role));
 
         return new ResponseEntity<>(authResponse, HttpStatus.OK);
+
+    } catch (BadCredentialsException e) {
+        // Handle invalid credentials
+        AuthResponse errorResponse = new AuthResponse();
+        errorResponse.setMessage("Invalid username or password");
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+
+    } catch (Exception e) {
+        // Handle general exceptions (e.g., user not found)
+        AuthResponse errorResponse = new AuthResponse();
+        errorResponse.setMessage("User not available or some other error occurred");
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
     }
 
     private Authentication authenticate(String username, String password) {
