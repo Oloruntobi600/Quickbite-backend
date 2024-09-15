@@ -9,8 +9,14 @@ services:
       POSTGRES_DB: Quickbite-projects
     ports:
       - "5433:5432"  # Map external port 5434 to internal port 5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
-      - Quickbite-network
+        - Quickbite-network
+
 
   app:
     build: .
@@ -19,13 +25,13 @@ services:
     depends_on:
       - postgres
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5433/Quickbite-projects  # Use the internal port 5432 and the service name `postgres`
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: Olawumi  # Ensure this matches the password set for the postgres service
+      SPRING_DATASOURCE_URL: jdbc:postgresql://dpg-crivii3v2p9s738pc1d0-a.oregon-postgres.render.com:5432/quickbite_lbxo
+      SPRING_DATASOURCE_USERNAME: quickbite_lbxo_user
+      SPRING_DATASOURCE_PASSWORD: e5Os5uK3Kr0ndmwa2ZIc1iv27cqgD2ss
     networks:
       - Quickbite-network
 
 networks:
-  monetamedia-network:
+  Quickbite-network:
     driver: bridge
 
