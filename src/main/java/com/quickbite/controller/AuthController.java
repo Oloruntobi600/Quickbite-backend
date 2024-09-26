@@ -2,16 +2,21 @@ package com.quickbite.controller;
 
 import com.quickbite.config.JwtProvider;
 import com.quickbite.model.Cart;
+import com.quickbite.model.PasswordResetToken;
 import com.quickbite.model.USER_ROLE;
 import com.quickbite.model.User;
 import com.quickbite.repository.CartRepository;
+import com.quickbite.repository.PasswordResetTokenRepository;
 import com.quickbite.repository.UserRepository;
+import com.quickbite.request.ForgotPasswordRequest;
 import com.quickbite.request.LoginRequest;
 import com.quickbite.response.AuthResponse;
 import com.quickbite.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,8 +25,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.UUID;
 
 
 @RestController
@@ -42,6 +50,44 @@ public class AuthController {
 
     @Autowired
     private CartRepository cartRepository;
+
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
+
+    @Autowired
+    private JavaMailSender emailSender;
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail());
+        if (user == null) {
+            return new ResponseEntity<>("User with this email does not exist.", HttpStatus.NOT_FOUND);
+        }
+
+        String token = UUID.randomUUID().toString();
+
+        // Set token expiry (e.g., valid for 24 hours)
+        LocalDateTime expiryDate = LocalDateTime.now().plusHours(24);
+
+        // Save token to database
+        PasswordResetToken passwordResetToken = new PasswordResetToken(token, user, expiryDate);
+        passwordResetTokenRepository.save(passwordResetToken);
+
+        // Create reset link with token
+        String resetLink = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/reset-password")
+                .queryParam("token", token)
+                .toUriString();
+
+        // Send email
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(user.getEmail());
+        message.setSubject("Password Reset Request");
+        message.setText("To reset your password, click the link: " + resetLink);
+        emailSender.send(message);
+
+        return new ResponseEntity<>("Password reset email sent successfully.", HttpStatus.OK);
+    }
 
     @PostMapping("/signup")
     public ResponseEntity<AuthResponse>createUserHandler(@RequestBody User user) throws Exception {
@@ -123,4 +169,5 @@ public class AuthController {
         }
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
+
 }

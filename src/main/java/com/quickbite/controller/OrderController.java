@@ -69,4 +69,43 @@ public class OrderController {
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
+    @DeleteMapping("/order/{orderId}")
+    public ResponseEntity<String> cancelOrder(@PathVariable Long orderId,
+                                              @RequestHeader("Authorization") String jwt) throws Exception {
+        User user = userService.findUserByJwtToken(jwt);
+        Order order = orderService.findOrderById(orderId);
+
+        if (!order.getCustomer().getId().equals(user.getId())) {
+            return new ResponseEntity<>("Unauthorized action", HttpStatus.FORBIDDEN);
+        }
+
+        // Only allow cancellation if the order is still pending
+        if (!order.getOrderStatus().equals("PENDING")) {
+            return new ResponseEntity<>("Order cannot be canceled", HttpStatus.BAD_REQUEST);
+        }
+
+        orderService.cancelOrder(orderId);
+        return new ResponseEntity<>("Order canceled successfully", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/admin/orders/{orderId}")
+    public ResponseEntity<String> deleteOrder(@PathVariable Long orderId,
+                                              @RequestHeader("Authorization") String jwt) throws Exception {
+        // Assuming you have a method to check if the user is an admin
+        User user = userService.findUserByJwtToken(jwt);
+        if (!user.isAdmin()) {
+            return new ResponseEntity<>("Unauthorized action", HttpStatus.FORBIDDEN);
+        }
+
+        Order order = orderService.findOrderById(orderId);
+
+        // Only allow deletion if the order is completed
+        if (!order.getOrderStatus().equals("COMPLETED")) {
+            return new ResponseEntity<>("Order cannot be deleted", HttpStatus.BAD_REQUEST);
+        }
+
+        orderService.deleteOrder(orderId);
+        return new ResponseEntity<>("Order deleted successfully", HttpStatus.OK);
+    }
+
 }

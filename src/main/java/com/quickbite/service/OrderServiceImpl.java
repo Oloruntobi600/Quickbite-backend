@@ -133,4 +133,10 @@ public class OrderServiceImpl implements OrderService{
         }
         return optionalOrder.get();
     }
+
+    @Override
+    public void deleteOrder(Long orderId) throws Exception {
+        Order order = findOrderById(orderId);
+        orderRepository.deleteById(orderId);
+    }
 }
